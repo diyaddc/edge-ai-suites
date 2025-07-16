@@ -159,8 +159,19 @@ jobs:
   
 
 
-
+  pre-rep:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - name: Checkout target repository (edge-ai-libraries)
+        uses: actions/checkout@v3
+        with:
+          repository: open-edge-platform/edge-ai-libraries  # 替换为实际仓库名
+          path: edge-ai-libraries  # 克隆到指定目录
   scan-dataprep-dockerfile:
+    needs: pre-rep
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -173,11 +184,7 @@ jobs:
           trivy-report-format: 'json'
           severity-levels: 'HIGH,CRITICAL'
           output-report-path: trivy-visual-dockerfile.json
-      - name: Checkout Code
-        uses: actions/checkout@v4
-        with:
-          repository: open-edge-platform/edge-ai-libraries  # 替换为实际仓库名
-          path: edge-ai-libraries  # 克隆到指定目录
+
       - name: Run Trivy Scan
         uses: open-edge-platform/edge-ai-libraries/.github/workflows/trivy-config-mode.yaml@main
         with:
