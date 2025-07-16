@@ -156,18 +156,37 @@ jobs:
       #   uses: actions/upload-artifact@v4
       #   with:
 
-  setup-repos:
+  prepare-repos:
     runs-on: ubuntu-latest
+    outputs:
+      libraries-path: ${{ steps.set-path.outputs.path }}
     steps:
-      - name: clone libraries
-        continue-on-error: true
-        shell: bash
-        run: |
-              git clone https://github.com/open-edge-platform/edge-ai-libraries.git
-              ls
+      - name: Checkout edge-ai-suites (当前仓库)
+        uses: actions/checkout@v4
+        
+      - name: Checkout edge-ai-libraries (目标仓库)
+        uses: actions/checkout@v4
+        with:
+          repository: open-edge-platform/edge-ai-libraries
+          path: edge-ai-libraries
+
+      - name: Set libraries path
+        id: set-path
+        run: echo "path=edge-ai-libraries" >> $GITHUB_OUTPUT
+
+  scan-dataprep1-dockerfile:
+    needs: prepare-repos
+    permissions:
+      contents: read
+      packages: read
+    uses: open-edge-platform/edge-ai-libraries/.github/workflows/trivy-config-mode.yaml@main
+    with:
+      dockerfile-path: ${{ needs.prepare-repos.outputs.libraries-path }}/microservices/visual-data-preparation-for-retrieval/milvus/src/Dockerfile
+      trivy-report-format: 'json'
+      severity-levels: 'HIGH,CRITICAL'
+      output-report-path: trivy-dataprep-dockerfile.json
 
   scan-visual-dockerfile:
-    needs: setup-repos
     permissions:
       contents: read
       packages: read
@@ -179,7 +198,6 @@ jobs:
       output-report-path: trivy-visual-dockerfile.json
 
   scan-dataprep-dockerfile:
-    needs: setup-repos
     permissions:
       contents: read
       packages: read
@@ -191,7 +209,6 @@ jobs:
       output-report-path: trivy-dataprep-dockerfile.json
 
   scan-retriever-dockerfile:
-    needs: setup-repos
     permissions:
       contents: read
       packages: read
@@ -203,7 +220,6 @@ jobs:
       output-report-path: trivy-retriever-dockerfile.json
 
   scan-vlm-dockerfile:
-    needs: setup-repos
     permissions:
       contents: read
       packages: read
