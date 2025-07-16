@@ -190,7 +190,7 @@ jobs:
       fail-fast: false
     uses: open-edge-platform/edge-ai-libraries/.github/workflows/trivy-config-mode.yaml@e6e04af3dbca805db9118b85a22ad2998f7eec39
     with:
-      dockerfile-path: edge-ai-suites/metro-ai-suite/visual-search-question-and-answering/src/Dockerfile
+      dockerfile-path: metro-ai-suite/visual-search-question-and-answering/src/Dockerfile
       trivy-report-format: 'json'
       severity-levels: 'HIGH,CRITICAL'
       output-report-path: trivy-visual-dockerfile.json
