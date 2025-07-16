@@ -156,38 +156,7 @@ jobs:
       #   uses: actions/upload-artifact@v4
       #   with:
 
-  prepare-repos:
-    runs-on: ubuntu-latest
-    outputs:
-      libraries-path: ${{ steps.checkout-libraries.outputs.path }}
-    
-    steps:
-      - name: Checkout edge-ai-suites (current repo)
-        uses: actions/checkout@v4
-        
-      - name: Checkout edge-ai-libraries
-        uses: actions/checkout@v4
-        with:
-          repository: open-edge-platform/edge-ai-libraries
-          path: edge-ai-libraries
-        id: checkout-libraries
-
-      - name: Verify Dockerfile exists
-        run: |
-          ls -la ${{ steps.checkout-libraries.outputs.path }}/microservices/visual-data-preparation-for-retrieval/milvus/src/
-          test -f ${{ steps.checkout-libraries.outputs.path }}/microservices/visual-data-preparation-for-retrieval/milvus/src/Dockerfile || { echo "Dockerfile not found"; exit 1; }
-          
-  scan-dataprep1-dockerfile:
-    needs: prepare-repos
-    permissions:
-      contents: read
-      packages: read
-    uses: open-edge-platform/edge-ai-libraries/.github/workflows/trivy-config-mode.yaml@main
-    with:
-      dockerfile-path: ${{ needs.prepare-repos.outputs.libraries-path }}/microservices/visual-data-preparation-for-retrieval/milvus/src/Dockerfile
-      trivy-report-format: 'json'
-      severity-levels: 'HIGH,CRITICAL'
-      output-report-path: trivy-dataprep-dockerfile.json
+  
 
   scan-visual-dockerfile:
     permissions:
@@ -200,35 +169,34 @@ jobs:
       severity-levels: 'HIGH,CRITICAL'
       output-report-path: trivy-visual-dockerfile.json
 
-  scan-dataprep-dockerfile:
+  scan:
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: read
-    uses: open-edge-platform/edge-ai-libraries/.github/workflows/trivy-config-mode.yaml@main
-    with:
-      dockerfile-path: edge-ai-libraries/microservices/visual-data-preparation-for-retrieval/milvus/src/Dockerfile
-      trivy-report-format: 'json'
-      severity-levels: 'HIGH,CRITICAL'
-      output-report-path: trivy-dataprep-dockerfile.json
+    
+    steps:
+      - name: Checkout edge-ai-suites (current repo)
+        uses: actions/checkout@v4
+        
+      - name: Checkout edge-ai-libraries
+        uses: actions/checkout@v4
+        with:
+          repository: open-edge-platform/edge-ai-libraries
+          path: edge-ai-libraries
+          ref: main  # 明确指定分支
 
-  scan-retriever-dockerfile:
-    permissions:
-      contents: read
-      packages: read
-    uses: open-edge-platform/edge-ai-libraries/.github/workflows/trivy-config-mode.yaml@main
-    with:
-      dockerfile-path: edge-ai-libraries/microservices/vector-retriever/milvus/src/Dockerfile
-      trivy-report-format: 'json'
-      severity-levels: 'HIGH,CRITICAL'
-      output-report-path: trivy-retriever-dockerfile.json
+      - name: Verify Dockerfile path
+        run: |
+          echo "Current directory: $(pwd)"
+          ls -la edge-ai-libraries/microservices/visual-data-preparation-for-retrieval/milvus/src/
+          test -f edge-ai-libraries/microservices/visual-data-preparation-for-retrieval/milvus/src/Dockerfile || { echo "ERROR: Dockerfile not found at specified path"; exit 1; }
 
-  scan-vlm-dockerfile:
-    permissions:
-      contents: read
-      packages: read
-    uses: open-edge-platform/edge-ai-libraries/.github/workflows/trivy-config-mode.yaml@main
-    with:
-      dockerfile-path: edge-ai-libraries/microservices/vlm-openvino-serving/docker/Dockerfile
-      trivy-report-format: 'json'
-      severity-levels: 'HIGH,CRITICAL'
-      output-report-path: trivy-vlm-dockerfile.json
+      - name: Run Trivy scan
+        uses: open-edge-platform/edge-ai-libraries/.github/workflows/trivy-config-mode.yaml@main
+        with:
+          dockerfile-path: edge-ai-libraries/microservices/visual-data-preparation-for-retrieval/milvus/src/Dockerfile
+          trivy-report-format: 'json'
+          severity-levels: 'HIGH,CRITICAL'
+          output-report-path: trivy-dataprep-dockerfile.json
+
