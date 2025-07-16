@@ -155,43 +155,76 @@ jobs:
       # - name: Upload Scan artifact to Github
       #   uses: actions/upload-artifact@v4
       #   with:
+
   setup-repos:
-      runs-on: ubuntu-latest
-      outputs:
-        repo-path: ${{ steps.set-path.outputs.repo-path }}
-      steps:
-        - name: Checkout edge-ai-suites
-          uses: actions/checkout@v4
-          with:
-            path: edge-ai-suites  # 这会创建edge-ai-suites子目录
-            ref: main
-  
-        - name: Validate repository structure
-          id: validate
-          run: |
-            echo "当前工作目录: $(pwd)"
-            echo "仓库目录结构:"
-            ls -R edge-ai-suites/
-            # 检查Dockerfile是否存在
-            if [ -f "edge-ai-suites/metro-ai-suite/visual-search-question-and-answering/src/Dockerfile" ]; then
-              echo "::set-output name=dockerfile-exists::true"
-            else
-              echo "::error::Dockerfile不存在于预期路径"
-              echo "完整路径检查:"
-              find edge-ai-suites -name Dockerfile
-              exit 1
-            fi
-  trivy-config-visual-dockerfile-scan:
+    runs-on: ubuntu-latest
+    outputs:
+      suites-path: ${{ steps.set-suites-path.outputs.path }}
+      libraries-path: ${{ steps.set-libraries-path.outputs.path }}
+    steps:
+      - name: Checkout edge-ai-suites (当前仓库)
+        uses: actions/checkout@v4
+        with:
+          path: edge-ai-suites
+
+      - name: Checkout edge-ai-libraries (外部仓库)
+        uses: actions/checkout@v4
+        with:
+          repository: open-edge-platform/edge-ai-libraries
+          path: edge-ai-libraries
+
+      - name: Set suites path
+        id: set-suites-path
+        run: echo "path=edge-ai-suites" >> $GITHUB_OUTPUT
+
+      - name: Set libraries path
+        id: set-libraries-path
+        run: echo "path=edge-ai-libraries" >> $GITHUB_OUTPUT
+
+  scan-visual-dockerfile:
+    needs: setup-repos
     permissions:
       contents: read
-      packages: read          # needed for actions/checkout
-    name: Scan Visual Dockerfile
-    strategy:
-      fail-fast: false
-    uses: open-edge-platform/edge-ai-libraries/.github/workflows/trivy-config-mode.yaml@e6e04af3dbca805db9118b85a22ad2998f7eec39
+      packages: read
+    uses: open-edge-platform/edge-ai-libraries/.github/workflows/trivy-config-mode.yaml@main
     with:
-      dockerfile-path: metro-ai-suite/visual-search-question-and-answering/src/Dockerfile
+      dockerfile-path: ${{ needs.setup-repos.outputs.suites-path }}/metro-ai-suite/visual-search-question-and-answering/src/Dockerfile
       trivy-report-format: 'json'
       severity-levels: 'HIGH,CRITICAL'
       output-report-path: trivy-visual-dockerfile.json
-      name: Time Series Visual Dockerfile
+
+  scan-dataprep-dockerfile:
+    needs: setup-repos
+    permissions:
+      contents: read
+      packages: read
+    uses: open-edge-platform/edge-ai-libraries/.github/workflows/trivy-config-mode.yaml@main
+    with:
+      dockerfile-path: ${{ needs.setup-repos.outputs.libraries-path }}/microservices/visual-data-preparation-for-retrieval/milvus/src/Dockerfile
+      trivy-report-format: 'json'
+      severity-levels: 'HIGH,CRITICAL'
+      output-report-path: trivy-dataprep-dockerfile.json
+
+  scan-retriever-dockerfile:
+    needs: setup-repos
+    permissions:
+      contents: read
+      packages: read
+    uses: open-edge-platform/edge-ai-libraries/.github/workflows/trivy-config-mode.yaml@main
+    with:
+      dockerfile-path: ${{ needs.setup-repos.outputs.libraries-path }}/microservices/vector-retriever/milvus/src/Dockerfile
+      trivy-report-format: 'json'
+      severity-levels: 'HIGH,CRITICAL'
+      output-report-path: trivy-retriever-dockerfile.json
+
+  scan-vlm-dockerfile:
+    needs: setup-repos
+    permissions:
+      contents: read
+      packages: read
+    uses: open-edge-platform/edge-ai-libraries/.github/workflows/trivy-config-mode.yaml@main
+    with:
+      dockerfile-path: ${{ needs.setup-repos.outputs.libraries-path }}/microservices/vlm-openvino-serving/docker/Dockerfile
+      trivy-report-format: 'json'
+      severity-levels: 'HIGH,CRITICAL'
+      output-report-path: trivy-vlm-dockerfile.json
