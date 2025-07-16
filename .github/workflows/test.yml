@@ -156,17 +156,52 @@ jobs:
       #   uses: actions/upload-artifact@v4
       #   with:
 
+  setup-repos:
+    runs-on: ubuntu-latest
+    outputs:
+      repo-path: ${{ steps.set-path.outputs.repo-path }}
+    steps:
+      - name: Checkout edge-ai-suites
+        uses: actions/checkout@v4
+        with:
+          path: edge-ai-suites
+          ref: main
+
+      - name: Verify repository structure
+        id: set-path
+        run: |
+          echo "Current directory: $(pwd)"
+          echo "edge-ai-suites structure:"
+          ls -R edge-ai-suites || echo "No edge-ai-suites found"
+          
+          # 确认Dockerfile实际路径
+          DOCKERFILE_PATH="edge-ai-suites/metro-ai-suite/visual-search-question-and-answering/src/Dockerfile"
+          if [ -f "$DOCKERFILE_PATH" ]; then
+            echo "Dockerfile found at: $DOCKERFILE_PATH"
+            echo "repo-path=edge-ai-suites" >> $GITHUB_OUTPUT
+          else
+            echo "ERROR: Dockerfile not found at expected path"
+            echo "Actual files at metro-ai-suite:"
+            ls -R edge-ai-suites/metro-ai-suite || true
+            exit 1
+          fi
+
   trivy-config-visual-dockerfile-scan:
+    needs: setup-repos
     permissions:
       contents: read
-      packages: read          # needed for actions/checkout
-    name: Scan Visual Dockerfile
-    strategy:
-      fail-fast: false
-    uses: open-edge-platform/edge-ai-libraries/.github/workflows/trivy-config-mode.yaml@e6e04af3dbca805db9118b85a22ad2998f7eec39
-    with:
-      dockerfile-path: edge-ai-suites/metro-ai-suite/visual-search-question-and-answering/src/Dockerfile
-      trivy-report-format: 'json'
-      severity-levels: 'HIGH,CRITICAL'
-      output-report-path: trivy-visual-dockerfile.json
-      name: Time Series Visual Dockerfile
+      packages: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify Dockerfile path
+        run: |
+          echo "Checking path: ${{ needs.setup-repos.outputs.repo-path }}/metro-ai-suite/visual-search-question-and-answering/src/"
+          ls -la ${{ needs.setup-repos.outputs.repo-path }}/metro-ai-suite/visual-search-question-and-answering/src/
+
+      - name: Run Trivy Scan
+        uses: open-edge-platform/edge-ai-libraries/.github/workflows/trivy-config-mode.yaml@e6e04af3dbca805db9118b85a22ad2998f7eec39
+        with:
+          dockerfile-path: ${{ needs.setup-repos.outputs.repo-path }}/metro-ai-suite/visual-search-question-and-answering/src/Dockerfile
+          trivy-report-format: 'json'
+          severity-levels: 'HIGH,CRITICAL'
+          output-report-path: trivy-visual-dockerfile.json
