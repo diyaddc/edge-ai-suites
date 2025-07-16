@@ -159,25 +159,24 @@ jobs:
   prepare-repos:
     runs-on: ubuntu-latest
     outputs:
-      libraries-path: ${{ steps.set-path.outputs.path }}
+      libraries-path: ${{ steps.checkout-libraries.outputs.path }}
+    
     steps:
-      - name: Checkout edge-ai-suites (当前仓库)
+      - name: Checkout edge-ai-suites (current repo)
         uses: actions/checkout@v4
         
-      - name: Checkout edge-ai-libraries (目标仓库)
+      - name: Checkout edge-ai-libraries
         uses: actions/checkout@v4
         with:
           repository: open-edge-platform/edge-ai-libraries
           path: edge-ai-libraries
+        id: checkout-libraries
 
-      - name: Set libraries path
-        id: set-path
-        run: echo "path=edge-ai-libraries" >> $GITHUB_OUTPUT
       - name: Verify Dockerfile exists
         run: |
           ls -la ${{ steps.checkout-libraries.outputs.path }}/microservices/visual-data-preparation-for-retrieval/milvus/src/
           test -f ${{ steps.checkout-libraries.outputs.path }}/microservices/visual-data-preparation-for-retrieval/milvus/src/Dockerfile || { echo "Dockerfile not found"; exit 1; }
-
+          
   scan-dataprep1-dockerfile:
     needs: prepare-repos
     permissions:
