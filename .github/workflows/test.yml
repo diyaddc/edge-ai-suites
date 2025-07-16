@@ -162,24 +162,11 @@ jobs:
       suites-path: ${{ steps.set-suites-path.outputs.path }}
       libraries-path: ${{ steps.set-libraries-path.outputs.path }}
     steps:
-      - name: Checkout edge-ai-suites (当前仓库)
-        uses: actions/checkout@v4
-        with:
-          path: edge-ai-suites
-
-      - name: Checkout edge-ai-libraries (外部仓库)
-        uses: actions/checkout@v4
-        with:
-          repository: open-edge-platform/edge-ai-libraries
-          path: edge-ai-libraries
-
-      - name: Set suites path
-        id: set-suites-path
-        run: echo "path=edge-ai-suites" >> $GITHUB_OUTPUT
-
-      - name: Set libraries path
-        id: set-libraries-path
-        run: echo "path=edge-ai-libraries" >> $GITHUB_OUTPUT
+      - name: clone libraries
+        continue-on-error: true
+        shell: bash
+        run: |
+              git clone https://github.com/open-edge-platform/edge-ai-libraries.git
 
   scan-visual-dockerfile:
     needs: setup-repos
@@ -188,7 +175,7 @@ jobs:
       packages: read
     uses: open-edge-platform/edge-ai-libraries/.github/workflows/trivy-config-mode.yaml@main
     with:
-      dockerfile-path: ${{ needs.setup-repos.outputs.suites-path }}/metro-ai-suite/visual-search-question-and-answering/src/Dockerfile
+      dockerfile-path: visual-search-question-and-answering/src/Dockerfile
       trivy-report-format: 'json'
       severity-levels: 'HIGH,CRITICAL'
       output-report-path: trivy-visual-dockerfile.json
@@ -200,7 +187,7 @@ jobs:
       packages: read
     uses: open-edge-platform/edge-ai-libraries/.github/workflows/trivy-config-mode.yaml@main
     with:
-      dockerfile-path: ${{ needs.setup-repos.outputs.libraries-path }}/microservices/visual-data-preparation-for-retrieval/milvus/src/Dockerfile
+      dockerfile-path: edge-ai-libraries/microservices/visual-data-preparation-for-retrieval/milvus/src/Dockerfile
       trivy-report-format: 'json'
       severity-levels: 'HIGH,CRITICAL'
       output-report-path: trivy-dataprep-dockerfile.json
@@ -212,7 +199,7 @@ jobs:
       packages: read
     uses: open-edge-platform/edge-ai-libraries/.github/workflows/trivy-config-mode.yaml@main
     with:
-      dockerfile-path: ${{ needs.setup-repos.outputs.libraries-path }}/microservices/vector-retriever/milvus/src/Dockerfile
+      dockerfile-path: edge-ai-libraries/microservices/vector-retriever/milvus/src/Dockerfile
       trivy-report-format: 'json'
       severity-levels: 'HIGH,CRITICAL'
       output-report-path: trivy-retriever-dockerfile.json
@@ -224,7 +211,7 @@ jobs:
       packages: read
     uses: open-edge-platform/edge-ai-libraries/.github/workflows/trivy-config-mode.yaml@main
     with:
-      dockerfile-path: ${{ needs.setup-repos.outputs.libraries-path }}/microservices/vlm-openvino-serving/docker/Dockerfile
+      dockerfile-path: edge-ai-libraries/microservices/vlm-openvino-serving/docker/Dockerfile
       trivy-report-format: 'json'
       severity-levels: 'HIGH,CRITICAL'
       output-report-path: trivy-vlm-dockerfile.json
