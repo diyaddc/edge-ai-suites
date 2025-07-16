@@ -160,5 +160,22 @@ jobs:
       # - name: Upload Scan artifact to Github
       #   uses: actions/upload-artifact@v4
       #   with:
+
+  trivy-config-dataprep-dockerfile-scan:
+    permissions:
+      contents: read
+      packages: read          # needed for actions/checkout
+    name: Scan Dataprep Dockerfile
+    strategy:
+      fail-fast: false
+    uses: open-edge-platform/edge-ai-libraries/.github/workflows/trivy-config-mode.yaml@v4
+    with:
+      dockerfile-path: open-edge-platform/edge-ai-libraries/microservices/visual-data-preparation-for-retrieval/milvus/src/Dockerfile
+      trivy-report-format: 'json'
+      severity-levels: 'HIGH,CRITICAL'
+      output-report-path: trivy-dataprep-dockerfile.json
+      name: Time Series Dataprep Dockerfile
+
+
       #     name: Trivy Config Scan for Helm
       #     path: manufacturing-ai-suite/wind-turbine-anomaly-detection/helm/trivy_*
