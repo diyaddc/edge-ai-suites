@@ -166,6 +166,13 @@ jobs:
       contents: read
       packages: read
     steps:
+      - name : scan-visual-dockerfile
+        uses: open-edge-platform/edge-ai-libraries/.github/workflows/trivy-config-mode.yaml@main
+        with:
+          dockerfile-path: metro-ai-suite/visual-search-question-and-answering/src/Dockerfile
+          trivy-report-format: 'json'
+          severity-levels: 'HIGH,CRITICAL'
+          output-report-path: trivy-visual-dockerfile.json
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
@@ -179,14 +186,7 @@ jobs:
           severity-levels: 'HIGH,CRITICAL'
           output-report-path: trivy-dataprep-dockerfile.json
           
-  scan-visual-dockerfile:
-    permissions:
-      contents: read
-      packages: read
-    uses: open-edge-platform/edge-ai-libraries/.github/workflows/trivy-config-mode.yaml@main
     
-    with:
-      dockerfile-path: metro-ai-suite/visual-search-question-and-answering/src/Dockerfile
-      trivy-report-format: 'json'
-      severity-levels: 'HIGH,CRITICAL'
-      output-report-path: trivy-visual-dockerfile.json
+    
+
+
