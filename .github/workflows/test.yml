@@ -155,70 +155,54 @@ jobs:
       #   uses: actions/upload-artifact@v4
       #   with:
 
-  scan-dockerfiles:
-    runs-on: ubuntu-latest
+  scan-dataprep-dockerfile:
     permissions:
       contents: read
       packages: read
-    
-    steps:
-      - name: Checkout edge-ai-suites
-        uses: actions/checkout@v4
-        with:
-          path: edge-ai-suites
-      
-      - name: Checkout edge-ai-libraries
-        uses: actions/checkout@v4
-        with:
-          repository: open-edge-platform/edge-ai-libraries
-          path: edge-ai-libraries
-      
-      # 扫描Dataprep Dockerfile (来自依赖仓库)
-      - name: Scan Dataprep Dockerfile
-        uses: open-edge-platform/edge-ai-libraries/.github/workflows/trivy-config-mode.yaml@e6e04af3dbca805db9118b85a22ad2998f7eec39
-        with:
-          dockerfile-path: edge-ai-libraries/metro-ai-suite/visual-data-preparation-for-retrieval/milvus/src/Dockerfile
-          trivy-report-format: 'json'
-          severity-levels: 'HIGH,CRITICAL'
-          output-report-path: trivy-dataprep-dockerfile.json
-          name: Dataprep Server Dockerfile
-      
-      # 扫描Retriever Dockerfile (来自依赖仓库)
-      - name: Scan Retriever Dockerfile
-        uses: open-edge-platform/edge-ai-libraries/.github/workflows/trivy-config-mode.yaml@e6e04af3dbca805db9118b85a22ad2998f7eec39
-        with:
-          dockerfile-path: edge-ai-libraries/metro-ai-suite/vector-retriever/milvus/src/Dockerfile
-          trivy-report-format: 'json'
-          severity-levels: 'HIGH,CRITICAL'
-          output-report-path: trivy-retriever-dockerfile.json
-          name: Retriever Server Dockerfile
-      
-      # 扫描Vlm Dockerfile (来自依赖仓库)
-      - name: Scan Vlm Dockerfile
-        uses: open-edge-platform/edge-ai-libraries/.github/workflows/trivy-config-mode.yaml@e6e04af3dbca805db9118b85a22ad2998f7eec39
-        with:
-          dockerfile-path: edge-ai-libraries/metro-ai-suite/vlm-openvino-serving/docker/Dockerfile
-          trivy-report-format: 'json'
-          severity-levels: 'HIGH,CRITICAL'
-          output-report-path: trivy-vlm-dockerfile.json
-          name: Vlm Server Dockerfile
+    uses: open-edge-platform/edge-ai-libraries/.github/workflows/trivy-config-mode.yaml@e6e04af3dbca805db9118b85a22ad2998f7eec39
+    with:
+      dockerfile-path: edge-ai-libraries/metro-ai-suite/visual-data-preparation-for-retrieval/milvus/src/Dockerfile
+      trivy-report-format: 'json'
+      severity-levels: 'HIGH,CRITICAL'
+      output-report-path: trivy-dataprep-dockerfile.json
+      name: Dataprep Server Dockerfile
+    secrets: inherit
 
-      # 扫描Visual Dockerfile (来自主仓库) - 修正路径
-      - name: Scan Visual Dockerfile
-        uses: open-edge-platform/edge-ai-libraries/.github/workflows/trivy-config-mode.yaml@e6e04af3dbca805db9118b85a22ad2998f7eec39
-        with:
-          dockerfile-path: edge-ai-suites/metro-ai-suite/visual-search-question-and-answering/src/Dockerfile
-          trivy-report-format: 'json'
-          severity-levels: 'HIGH,CRITICAL'
-          output-report-path: trivy-visual-dockerfile.json
-          name: Visual Server Dockerfile
-      
-      - name: Upload Dockerfile scan results
-        uses: actions/upload-artifact@v4
-        with:
-          name: trivy-dockerfile-reports
-          path: |
-            trivy-dataprep-dockerfile.json
-            trivy-retriever-dockerfile.json
-            trivy-vlm-dockerfile.json
-            trivy-visual-dockerfile.json
+  scan-retriever-dockerfile:
+    permissions:
+      contents: read
+      packages: read
+    uses: open-edge-platform/edge-ai-libraries/.github/workflows/trivy-config-mode.yaml@e6e04af3dbca805db9118b85a22ad2998f7eec39
+    with:
+      dockerfile-path: edge-ai-libraries/metro-ai-suite/vector-retriever/milvus/src/Dockerfile
+      trivy-report-format: 'json'
+      severity-levels: 'HIGH,CRITICAL'
+      output-report-path: trivy-retriever-dockerfile.json
+      name: Retriever Server Dockerfile
+    secrets: inherit
+
+  scan-vlm-dockerfile:
+    permissions:
+      contents: read
+      packages: read
+    uses: open-edge-platform/edge-ai-libraries/.github/workflows/trivy-config-mode.yaml@e6e04af3dbca805db9118b85a22ad2998f7eec39
+    with:
+      dockerfile-path: edge-ai-libraries/metro-ai-suite/vlm-openvino-serving/docker/Dockerfile
+      trivy-report-format: 'json'
+      severity-levels: 'HIGH,CRITICAL'
+      output-report-path: trivy-vlm-dockerfile.json
+      name: Vlm Server Dockerfile
+    secrets: inherit
+
+  scan-visual-dockerfile:
+    permissions:
+      contents: read
+      packages: read
+    uses: open-edge-platform/edge-ai-libraries/.github/workflows/trivy-config-mode.yaml@e6e04af3dbca805db9118b85a22ad2998f7eec39
+    with:
+      dockerfile-path: edge-ai-suites/metro-ai-suite/visual-search-question-and-answering/src/Dockerfile
+      trivy-report-format: 'json'
+      severity-levels: 'HIGH,CRITICAL'
+      output-report-path: trivy-visual-dockerfile.json
+      name: Visual Server Dockerfile
+    secrets: inherit
