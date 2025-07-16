@@ -168,7 +168,7 @@ jobs:
     name: Scan Dataprep Dockerfile
     strategy:
       fail-fast: false
-    uses: open-edge-platform/edge-ai-libraries/.github/workflows/trivy-config-mode.yaml@v4
+    uses: open-edge-platform/edge-ai-libraries/.github/workflows/trivy-config-mode.yaml@e6e04af3dbca805db9118b85a22ad2998f7eec39
     with:
       dockerfile-path: open-edge-platform/edge-ai-libraries/microservices/visual-data-preparation-for-retrieval/milvus/src/Dockerfile
       trivy-report-format: 'json'
