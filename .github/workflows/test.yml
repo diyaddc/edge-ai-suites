@@ -25,11 +25,13 @@ jobs:
         uses: actions/checkout@v4
         with:
           persist-credentials: false  
-      - name: Trivy filesystem/repo scan
+      - name: look path1
         continue-on-error: true
         shell: bash
         run: |
           pwd
+          cd ..
+          ls
       - name: Install Trivy from Aqua Security APT repo
         run: |
           sudo apt-get update
@@ -90,31 +92,40 @@ jobs:
         continue-on-error: true
         shell: bash
         run: |
-              pwd
               echo "Building Image and scanning Image"
-              cd metro-ai-suite/visual-search-question-and-answering/
-              make down
-              sed -i -e "s|OPC_UA_SERVER_IMAGE=.*|OPC_UA_SERVER_IMAGE=ia-opcua-server:latest|g" .env
-              sed -i -e "s|MQTT_PUBLISHER_IMAGE=.*|MQTT_PUBLISHER_IMAGE=ia-mqtt-publisher:latest|g" .env
-              make build
-
-              trivy image ia-opcua-server:latest --ignore-unfixed --format template --template "@trivy-html.tpl" -o trivy_image_scan_opcua_server.html
-              trivy image ia-opcua-server:latest --ignore-unfixed --format template --template "@csv.tpl" -o trivy_image_scan_opcua_server.csv
-              trivy image --quiet --format spdx-json --output trivy_image_scan_opcua_server.spdx.json ia-opcua-server:latest
-
-              trivy image --list-all-pkgs --format template --template "@csv.tpl" --output trivy-fs-opcua.csv ia-opcua-server:latest
-              trivy image --ignore-unfixed ia-opcua-server:latest | tee trivy-fs-opcua-ignore-unfixed.txt
+              git clone https://github.com/open-edge-platform/edge-ai-libraries.git
+              cd edge-ai-libraries/microservices
+              docker build -t dataprep-visualdata-milvus:latest --build-arg https_proxy=$https_proxy --build-arg http_proxy=$http_proxy --build-arg no_proxy=$no_proxy -f visual-data-preparation-for-retrieval/milvus/src/Dockerfile .
+              docker build -t retriever-milvus:latest --build-arg https_proxy=$https_proxy --build-arg http_proxy=$http_proxy --build-arg no_proxy=$no_proxy -f vector-retriever/milvus/src/Dockerfile .
+              cd vlm-openvino-serving
+              docker build -t vlm-openvino-serving:latest --build-arg https_proxy=$https_proxy --build-arg http_proxy=$http_proxy --build-arg no_proxy=$no_proxy -f docker/Dockerfile .
+              cd ../../..
+              docker build -t visual-search-qa-app:latest --build-arg https_proxy=$https_proxy --build-arg http_proxy=$http_proxy --build-arg no_proxy=$no_proxy -f visual-search-question-and-answering/src/Dockerfile .
 
 
-              trivy image ia-mqtt-publisher:latest --ignore-unfixed --format template --template "@trivy-html.tpl" -o trivy_image_scan_mqtt_publisher.html
-              trivy image ia-mqtt-publisher:latest --ignore-unfixed --format template --template "@csv.tpl" -o trivy_image_scan_mqtt_publisher.csv
-              trivy image --quiet --format spdx-json --output trivy_image_scan_mqtt_publisher.spdx.json ia-mqtt-publisher:latest
+              trivy image dataprep-visualdata-milvus:latest --ignore-unfixed --format template --template "@trivy-html.tpl" -o trivy_image_scan_dataprep_server.html
+              trivy image dataprep-visualdata-milvus:latest --ignore-unfixed --format template --template "@csv.tpl" -o trivy_image_scan_dataprep_server.csv
+              trivy image --quiet --format spdx-json --output trivy_image_scan_dataprep_server.spdx.json dataprep-visualdata-milvus:latest
 
-              trivy image --list-all-pkgs --format template --template "@csv.tpl" --output trivy-fs-mqttpublisher.csv ia-mqtt-publisher:latest
-              trivy image --ignore-unfixed ia-mqtt-publisher:latest | tee trivy-fs-mqttpublisher-ignore-unfixed.txt
+              trivy image retriever-milvus:latest --ignore-unfixed --format template --template "@trivy-html.tpl" -o trivy_image_scan_retriever_server.html
+              trivy image retriever-milvus:latest --ignore-unfixed --format template --template "@csv.tpl" -o trivy_image_scan_retriever_server.csv
+              trivy image --quiet --format spdx-json --output trivy_image_scan_retriever_server.spdx.json retriever-milvus:latest
+              
+              trivy image vlm-openvino-serving:latest --ignore-unfixed --format template --template "@trivy-html.tpl" -o trivy_image_scan_vlm_server.html
+              trivy image vlm-openvino-serving:latest --ignore-unfixed --format template --template "@csv.tpl" -o trivy_image_scan_vlm_server.csv
+              trivy image --quiet --format spdx-json --output trivy_image_scan_vlm_server.spdx.json vlm-openvino-serving:latest
 
+              trivy image visual-search-qa-app:latest --ignore-unfixed --format template --template "@trivy-html.tpl" -o trivy_image_scan_visual_server.html
+              trivy image visual-search-qa-app:latest --ignore-unfixed --format template --template "@csv.tpl" -o trivy_image_scan_visual_server.csv
+              trivy image --quiet --format spdx-json --output trivy_image_scan_visual_server.spdx.json visual-search-qa-app:latest
+              
               echo "completed Wind Turbine Sample App Image scanning"
-            
+      - name: look path2
+        continue-on-error: true
+        shell: bash
+        run: |
+          pwd
+          ls
       - name: Upload Trivy Image Scan Report
         continue-on-error: true
         if: always()
