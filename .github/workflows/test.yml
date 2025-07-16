@@ -158,9 +158,6 @@ jobs:
 
   setup-repos:
     runs-on: ubuntu-latest
-    outputs:
-      suites-path: ${{ steps.set-suites-path.outputs.path }}
-      libraries-path: ${{ steps.set-libraries-path.outputs.path }}
     steps:
       - name: clone libraries
         continue-on-error: true
@@ -175,7 +172,7 @@ jobs:
       packages: read
     uses: open-edge-platform/edge-ai-libraries/.github/workflows/trivy-config-mode.yaml@main
     with:
-      dockerfile-path: visual-search-question-and-answering/src/Dockerfile
+      dockerfile-path: metro-ai-suite/visual-search-question-and-answering/src/Dockerfile
       trivy-report-format: 'json'
       severity-levels: 'HIGH,CRITICAL'
       output-report-path: trivy-visual-dockerfile.json
