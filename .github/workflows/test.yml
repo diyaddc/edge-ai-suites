@@ -179,6 +179,7 @@ jobs:
       #   with:
 
   scan-dataprep-dockerfile:
+    needs: setup-repos
     permissions:
       contents: read
       packages: read
@@ -192,6 +193,7 @@ jobs:
     secrets: inherit
 
   scan-retriever-dockerfile:
+    needs: setup-repos
     permissions:
       contents: read
       packages: read
@@ -205,6 +207,7 @@ jobs:
     secrets: inherit
 
   scan-vlm-dockerfile:
+    needs: setup-repos
     permissions:
       contents: read
       packages: read
@@ -218,6 +221,7 @@ jobs:
     secrets: inherit
 
   scan-visual-dockerfile:
+    needs: setup-repos
     permissions:
       contents: read
       packages: read
