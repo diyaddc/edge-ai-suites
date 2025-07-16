@@ -118,7 +118,7 @@ jobs:
               cd ../../..
               cd metro-ai-suite
               docker build -t visual-search-qa-app:latest --build-arg https_proxy=$https_proxy --build-arg http_proxy=$http_proxy --build-arg no_proxy=$no_proxy -f visual-search-question-and-answering/src/Dockerfile .
-
+              docker images
 
               trivy image dataprep-visualdata-milvus:latest --ignore-unfixed --format template --template "@trivy-html.tpl" -o trivy_image_scan_dataprep_server.html
               trivy image dataprep-visualdata-milvus:latest --ignore-unfixed --format template --template "@csv.tpl" -o trivy_image_scan_dataprep_server.csv
@@ -137,20 +137,18 @@ jobs:
               trivy image --quiet --format spdx-json --output trivy_image_scan_visual_server.spdx.json visual-search-qa-app:latest
               
               echo "completed Wind Turbine Sample App Image scanning"
-      - name: look path2
-        continue-on-error: true
-        shell: bash
+      - name: Debug working directory
         run: |
-          pwd
-          ls
+          echo "Current directory: $(pwd)"
+          ls -R metro-ai-suite/ | grep trivy || echo "No trivy files found"
+
       - name: Upload Trivy Image Scan Report
         continue-on-error: true
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@v4
         with:
           name: Trivy Scan report fs and image
-          path: |
-                metro-ai-suite/trivy*
+          path: ${{ github.workspace }}/metro-ai-suite/trivy*
 
       - name: Trivy config scan for helm charts 
         run: |
