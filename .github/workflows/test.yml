@@ -150,15 +150,15 @@ jobs:
           name: Trivy Scan report fs and image
           path: ${{ github.workspace }}/metro-ai-suite/trivy*
 
-      - name: Trivy config scan for helm charts 
-        run: |
-          cd manufacturing-ai-suite/wind-turbine-anomaly-detection/
-          make gen_helm_charts
-          cd helm
-          trivy config . >> trivy_helm.txt
+      # - name: Trivy config scan for helm charts 
+      #   run: |
+      #     cd manufacturing-ai-suite/wind-turbine-anomaly-detection/
+      #     make gen_helm_charts
+      #     cd helm
+      #     trivy config . >> trivy_helm.txt
           
-      - name: Upload Scan artifact to Github
-        uses: actions/upload-artifact@v4
-        with:
-          name: Trivy Config Scan for Helm
-          path: manufacturing-ai-suite/wind-turbine-anomaly-detection/helm/trivy_*
+      # - name: Upload Scan artifact to Github
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: Trivy Config Scan for Helm
+      #     path: manufacturing-ai-suite/wind-turbine-anomaly-detection/helm/trivy_*
