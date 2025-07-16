@@ -163,40 +163,22 @@ jobs:
       contents: read
       packages: read
     uses: open-edge-platform/edge-ai-libraries/.github/workflows/trivy-config-mode.yaml@main
+    
     with:
       dockerfile-path: metro-ai-suite/visual-search-question-and-answering/src/Dockerfile
       trivy-report-format: 'json'
       severity-levels: 'HIGH,CRITICAL'
       output-report-path: trivy-visual-dockerfile.json
 
-  prepare-repos:
-    runs-on: ubuntu-latest
-    outputs:
-      libraries-path: ${{ steps.set-outputs.outputs.libraries-path }}
-    steps:
-      - name: Checkout edge-ai-suites (current repo)
-        uses: actions/checkout@v4
-        
-      - name: Checkout edge-ai-libraries
-        uses: actions/checkout@v4
-        with:
-          repository: open-edge-platform/edge-ai-libraries
-          path: edge-ai-libraries
-          ref: main
-
-      - name: Set output paths
-        id: set-outputs
-        run: |
-          echo "libraries-path=$(pwd)/edge-ai-libraries" >> $GITHUB_OUTPUT
-
   scan-dataprep-dockerfile:
-    needs: prepare-repos
     permissions:
       contents: read
       packages: read
     uses: open-edge-platform/edge-ai-libraries/.github/workflows/trivy-config-mode.yaml@main
     with:
-      dockerfile-path: ${{ needs.prepare-repos.outputs.libraries-path }}/microservices/visual-data-preparation-for-retrieval/milvus/src/Dockerfile
+      repository: open-edge-platform/edge-ai-libraries  # 替换为实际仓库名
+      path: edge-ai-libraries  # 克隆到指定目录
+      dockerfile-path: edge-ai-libraries/microservices/visual-data-preparation-for-retrieval/milvus/src/Dockerfile
       trivy-report-format: 'json'
       severity-levels: 'HIGH,CRITICAL'
       output-report-path: trivy-dataprep-dockerfile.json
