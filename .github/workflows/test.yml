@@ -158,23 +158,21 @@ jobs:
 
   
 
-  # scan-visual-dockerfile:
-  #   permissions:
-  #     contents: read
-  #     packages: read
-  #   uses: open-edge-platform/edge-ai-libraries/.github/workflows/trivy-config-mode.yaml@main
-  #   with:
-  #     dockerfile-path: metro-ai-suite/visual-search-question-and-answering/src/Dockerfile
-  #     trivy-report-format: 'json'
-  #     severity-levels: 'HIGH,CRITICAL'
-  #     output-report-path: trivy-visual-dockerfile.json
-
-  scan:
-    runs-on: ubuntu-latest
+  scan-visual-dockerfile:
     permissions:
       contents: read
       packages: read
-    
+    uses: open-edge-platform/edge-ai-libraries/.github/workflows/trivy-config-mode.yaml@main
+    with:
+      dockerfile-path: metro-ai-suite/visual-search-question-and-answering/src/Dockerfile
+      trivy-report-format: 'json'
+      severity-levels: 'HIGH,CRITICAL'
+      output-report-path: trivy-visual-dockerfile.json
+
+  prepare-repos:
+    runs-on: ubuntu-latest
+    outputs:
+      libraries-path: ${{ steps.set-outputs.outputs.libraries-path }}
     steps:
       - name: Checkout edge-ai-suites (current repo)
         uses: actions/checkout@v4
@@ -184,19 +182,22 @@ jobs:
         with:
           repository: open-edge-platform/edge-ai-libraries
           path: edge-ai-libraries
-          ref: main  # 明确指定分支
+          ref: main
 
-      - name: Verify Dockerfile path
+      - name: Set output paths
+        id: set-outputs
         run: |
-          echo "Current directory: $(pwd)"
-          ls -la edge-ai-libraries/microservices/visual-data-preparation-for-retrieval/milvus/src/
-          test -f edge-ai-libraries/microservices/visual-data-preparation-for-retrieval/milvus/src/Dockerfile || { echo "ERROR: Dockerfile not found at specified path"; exit 1; }
+          echo "libraries-path=$(pwd)/edge-ai-libraries" >> $GITHUB_OUTPUT
 
-      - name: Run Trivy scan
-        uses: open-edge-platform/edge-ai-libraries/.github/workflows/trivy-config-mode.yaml@main
-        with:
-          dockerfile-path: edge-ai-libraries/microservices/visual-data-preparation-for-retrieval/milvus/src/Dockerfile
-          trivy-report-format: 'json'
-          severity-levels: 'HIGH,CRITICAL'
-          output-report-path: trivy-dataprep-dockerfile.json
+  scan-dataprep-dockerfile:
+    needs: prepare-repos
+    permissions:
+      contents: read
+      packages: read
+    uses: open-edge-platform/edge-ai-libraries/.github/workflows/trivy-config-mode.yaml@main
+    with:
+      dockerfile-path: ${{ needs.prepare-repos.outputs.libraries-path }}/microservices/visual-data-preparation-for-retrieval/milvus/src/Dockerfile
+      trivy-report-format: 'json'
+      severity-levels: 'HIGH,CRITICAL'
+      output-report-path: trivy-dataprep-dockerfile.json
 
