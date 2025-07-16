@@ -32,6 +32,22 @@ jobs:
           pwd
           cd ..
           ls
+      - name: Free Disk Space
+        uses: jlumbroso/free-disk-space@main
+        with:
+          # 以下是可选的清理配置（默认全部开启）
+          tool-cache: true    # 清理工具缓存(约6GB)
+          android: true       # 清理Android SDK(约12GB)
+          dotnet: true        # 清理.NET(约1GB)
+          haskell: true       # 清理Haskell(约1GB)
+          large-packages: true # 清理大包(约5GB)
+          docker-images: true # 清理Docker镜像(约4GB)
+          swap-storage: true  # 清理交换空间(约2GB)
+      - name: Free Disk Space
+        # You may pin to the exact commit or the version.
+        # uses: ShubhamTatvamasi/free-disk-space-action@01128c655592f81375a0e0bb73d80031a2b44762
+        uses: ShubhamTatvamasi/free-disk-space-action@1.0.0
+          
       - name: Install Trivy from Aqua Security APT repo
         run: |
           sudo apt-get update
