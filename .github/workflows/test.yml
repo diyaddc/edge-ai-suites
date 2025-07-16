@@ -172,26 +172,19 @@ jobs:
           path: edge-ai-libraries  # 克隆到指定目录
   scan-dataprep-dockerfile:
     needs: pre-rep
-    runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: read
-    steps:
-      - name : scan-visual-dockerfile
-        uses: open-edge-platform/edge-ai-libraries/.github/workflows/trivy-config-mode.yaml@main
-        with:
-          dockerfile-path: metro-ai-suite/visual-search-question-and-answering/src/Dockerfile
-          trivy-report-format: 'json'
-          severity-levels: 'HIGH,CRITICAL'
-          output-report-path: trivy-visual-dockerfile.json
-
-      - name: Run Trivy Scan
-        uses: open-edge-platform/edge-ai-libraries/.github/workflows/trivy-config-mode.yaml@main
-        with:
-          dockerfile-path: edge-ai-libraries/microservices/visual-data-preparation-for-retrieval/milvus/src/Dockerfile
-          trivy-report-format: 'json'
-          severity-levels: 'HIGH,CRITICAL'
-          output-report-path: trivy-dataprep-dockerfile.json
+    uses: open-edge-platform/edge-ai-libraries/.github/workflows/trivy-config-mode.yaml@main
+    with:
+      dockerfile-paths: |
+        metro-ai-suite/visual-search-question-and-answering/src/Dockerfile
+        edge-ai-libraries/microservices/visual-data-preparation-for-retrieval/milvus/src/Dockerfile
+      trivy-report-format: 'json'
+      severity-levels: 'HIGH,CRITICAL'
+      output-report-paths: |
+        trivy-visual-dockerfile.json
+        trivy-dataprep-dockerfile.json
           
     
     
