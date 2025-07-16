@@ -164,6 +164,7 @@ jobs:
         shell: bash
         run: |
               git clone https://github.com/open-edge-platform/edge-ai-libraries.git
+              ls -R
 
   scan-visual-dockerfile:
     needs: setup-repos
