@@ -171,15 +171,21 @@ jobs:
       output-report-path: trivy-visual-dockerfile.json
 
   scan-dataprep-dockerfile:
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: read
-    uses: open-edge-platform/edge-ai-libraries/.github/workflows/trivy-config-mode.yaml@main
-    with:
-      repository: open-edge-platform/edge-ai-libraries  # 替换为实际仓库名
-      path: edge-ai-libraries  # 克隆到指定目录
-      dockerfile-path: edge-ai-libraries/microservices/visual-data-preparation-for-retrieval/milvus/src/Dockerfile
-      trivy-report-format: 'json'
-      severity-levels: 'HIGH,CRITICAL'
-      output-report-path: trivy-dataprep-dockerfile.json
+    steps:
+      - name: rep
+        uses: actions/checkout@v3
+        with:
+          repository: open-edge-platform/edge-ai-libraries  # 替换为实际仓库名
+          path: edge-ai-libraries  # 克隆到指定目录
+      - name: Run Trivy Scan
+        uses: open-edge-platform/edge-ai-libraries/.github/workflows/trivy-config-mode.yaml@main
+        with:
+          dockerfile-path: edge-ai-libraries/microservices/visual-data-preparation-for-retrieval/milvus/src/Dockerfile
+          trivy-report-format: 'json'
+          severity-levels: 'HIGH,CRITICAL'
+          output-report-path: trivy-dataprep-dockerfile.json
 
