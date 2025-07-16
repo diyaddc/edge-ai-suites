@@ -15,23 +15,6 @@ on:
   workflow_dispatch:
 
 jobs:   
-  setup-repos:
-    runs-on: ubuntu-latest
-    outputs:
-      repo-path: ${{ steps.set-path.outputs.repo-path }}
-    steps:
-      - name: Checkout edge-ai-suites
-        uses: actions/checkout@v4
-        with:
-          path: edge-ai-suites
-          ref: main  # 明确指定分支
-          
-      - name: Checkout edge-ai-libraries
-        uses: actions/checkout@v4
-        with:
-          repository: open-edge-platform/edge-ai-libraries
-          path: edge-ai-libraries
-
 
   trivy-scan-job:
     permissions:
@@ -172,20 +155,58 @@ jobs:
       # - name: Upload Scan artifact to Github
       #   uses: actions/upload-artifact@v4
       #   with:
+  setup-repos:
+    runs-on: ubuntu-latest
+    outputs:
+      repo-path: ${{ steps.set-path.outputs.repo-path }}
+      visual-path: ${{ steps.set-path.outputs.visual-path }}
+    steps:
+      - name: Checkout edge-ai-suites
+        uses: actions/checkout@v4
+        with:
+          path: edge-ai-suites
+          ref: main
 
+      - name: Checkout edge-ai-libraries
+        uses: actions/checkout@v4
+        with:
+          repository: open-edge-platform/edge-ai-libraries
+          path: edge-ai-libraries
+          ref: main
+
+      - name: Verify repository structure
+        id: set-path
+        run: |
+          echo "Checking edge-ai-libraries structure..."
+          ls -R edge-ai-libraries || echo "edge-ai-libraries not found"
+          
+          echo "Checking edge-ai-suites structure..."
+          ls -R edge-ai-suites || echo "edge-ai-suites not found"
+          
+          # 根据实际结构设置路径
+          echo "repo-path=edge-ai-libraries" >> $GITHUB_OUTPUT
+          echo "visual-path=edge-ai-suites" >> $GITHUB_OUTPUT
+          
   scan-dataprep-dockerfile:
     needs: setup-repos
     permissions:
       contents: read
       packages: read
-    uses: open-edge-platform/edge-ai-libraries/.github/workflows/trivy-config-mode.yaml@e6e04af3dbca805db9118b85a22ad2998f7eec39
-    with:
-      dockerfile-path: edge-ai-libraries/metro-ai-suite/visual-data-preparation-for-retrieval/milvus/src/Dockerfile
-      trivy-report-format: 'json'
-      severity-levels: 'HIGH,CRITICAL'
-      output-report-path: trivy-dataprep-dockerfile.json
-      name: Dataprep Server Dockerfile
-    secrets: inherit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Debug paths
+        run: |
+          echo "Checking Dockerfile at: ${{ needs.setup-repos.outputs.repo-path }}/visual-data-preparation-for-retrieval/milvus/src/Dockerfile"
+          ls -R ${{ needs.setup-repos.outputs.repo-path }} || true
+          
+      - name: Scan Dataprep Dockerfile
+        uses: open-edge-platform/edge-ai-libraries/.github/workflows/trivy-config-mode.yaml@e6e04af3dbca805db9118b85a22ad2998f7eec39
+        with:
+          dockerfile-path: ${{ needs.setup-repos.outputs.repo-path }}/visual-data-preparation-for-retrieval/milvus/src/Dockerfile
+          trivy-report-format: 'json'
+          severity-levels: 'HIGH,CRITICAL'
+          output-report-path: trivy-dataprep-dockerfile.json
+          name: Dataprep Server Dockerfile
 
   scan-retriever-dockerfile:
     needs: setup-repos
