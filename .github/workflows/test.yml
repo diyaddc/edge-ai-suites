@@ -32,12 +32,7 @@ jobs:
           repository: open-edge-platform/edge-ai-libraries
           path: edge-ai-libraries
 
-      - name: Verify Dockerfile paths
-        id: set-path
-        run: |
-          echo "Checking Dockerfile paths..."
-          ls -R edge-ai-libraries/metro-ai-suite/
-          echo "repo-path=edge-ai-libraries" >> $GITHUB_OUTPUT
+
   trivy-scan-job:
     permissions:
       contents: read
