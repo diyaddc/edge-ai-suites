@@ -116,7 +116,7 @@ jobs:
               cd vlm-openvino-serving
               #docker build -t vlm-openvino-serving:latest --build-arg https_proxy=$https_proxy --build-arg http_proxy=$http_proxy --build-arg no_proxy=$no_proxy -f docker/Dockerfile .
               cd ../../..
-              ls
+              cd metro-ai-suite
               docker build -t visual-search-qa-app:latest --build-arg https_proxy=$https_proxy --build-arg http_proxy=$http_proxy --build-arg no_proxy=$no_proxy -f visual-search-question-and-answering/src/Dockerfile .
 
 
@@ -150,7 +150,7 @@ jobs:
         with:
           name: Trivy Scan report fs and image
           path: |
-                manufacturing-ai-suite/wind-turbine-anomaly-detection/trivy*
+                metro-ai-suite/trivy*
 
       - name: Trivy config scan for helm charts 
         run: |
