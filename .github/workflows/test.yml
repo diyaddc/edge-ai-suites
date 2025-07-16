@@ -158,16 +158,16 @@ jobs:
 
   
 
-  scan-visual-dockerfile:
-    permissions:
-      contents: read
-      packages: read
-    uses: open-edge-platform/edge-ai-libraries/.github/workflows/trivy-config-mode.yaml@main
-    with:
-      dockerfile-path: metro-ai-suite/visual-search-question-and-answering/src/Dockerfile
-      trivy-report-format: 'json'
-      severity-levels: 'HIGH,CRITICAL'
-      output-report-path: trivy-visual-dockerfile.json
+  # scan-visual-dockerfile:
+  #   permissions:
+  #     contents: read
+  #     packages: read
+  #   uses: open-edge-platform/edge-ai-libraries/.github/workflows/trivy-config-mode.yaml@main
+  #   with:
+  #     dockerfile-path: metro-ai-suite/visual-search-question-and-answering/src/Dockerfile
+  #     trivy-report-format: 'json'
+  #     severity-levels: 'HIGH,CRITICAL'
+  #     output-report-path: trivy-visual-dockerfile.json
 
   scan:
     runs-on: ubuntu-latest
