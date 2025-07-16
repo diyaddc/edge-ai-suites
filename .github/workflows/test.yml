@@ -62,7 +62,7 @@ jobs:
         shell: bash
         run: |
           pwd
-          cd metro-ai-suite/visual-search-question-and-answering/
+          cd metro-ai-suite/
           trivy --version
           which trivy
           trivy image --download-db-only
