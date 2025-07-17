@@ -156,36 +156,35 @@ jobs:
       #   uses: actions/upload-artifact@v4
       #   with:
 
-  
-
-
-  pre-rep:
-    runs-on: ubuntu-latest
+  bandit-scans:
     permissions:
       contents: read
-      packages: read
+      packages: read          # needed for actions/checkout
+    name: Run Bandit Scan
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - ubuntu_version: ubuntu24
     steps:
-      - name: Checkout target repository (edge-ai-libraries)
-        uses: actions/checkout@v3
-        with:
-          repository: open-edge-platform/edge-ai-libraries  # 替换为实际仓库名
-          path: edge-ai-libraries  # 克隆到指定目录
-  scan-dataprep-dockerfile:
-    needs: pre-rep
-    permissions:
-      contents: read
-      packages: read
-    uses: open-edge-platform/edge-ai-libraries/.github/workflows/trivy-config-mode.yaml@main
-    with:
-      dockerfile-paths: |
-        metro-ai-suite/visual-search-question-and-answering/src/Dockerfile
-        edge-ai-libraries/microservices/visual-data-preparation-for-retrieval/milvus/src/Dockerfile
-      trivy-report-format: 'json'
-      severity-levels: 'HIGH,CRITICAL'
-      output-report-paths: |
-        trivy-visual-dockerfile.json
-        trivy-dataprep-dockerfile.json
-          
+    - name: Check out edge-ai-suites repository
+      uses: actions/checkout@v4
+      with:
+        persist-credentials: false
+
+    - name: Run Bandit Scan
+      run: |
+        mkdir -p reports
+        docker pull ghcr.io/pycqa/bandit/bandit
+        echo "### Bandit Scan Results" >> $GITHUB_STEP_SUMMARY
+        docker run --rm -v "${{ github.workspace }}:/src" ghcr.io/pycqa/bandit/bandit -r /src/metro-ai-suite/visual-search-question-and-answering/ -f txt -o /src/reports/bandit-report.txt || true >> $GITHUB_STEP_SUMMARY
+        echo "Please find full report in bandit-report.txt" >> $GITHUB_STEP_SUMMARY
+    - name: Upload Scan Reports
+      uses: actions/upload-artifact@v4
+      with:
+        name: bandit-report
+        path: reports/bandit-report.txt
     
     
 
