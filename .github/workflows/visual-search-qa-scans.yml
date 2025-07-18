@@ -2,8 +2,8 @@
 # SPDX-FileCopyrightText: (C) 2025 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-name: "Scan Trivy Bandit Virus"
-run-name: "Scan Trivy Bandit Virus"
+name: "[Visual Search and QA] SDLe Scans - Scan Trivy Bandit Virus"
+run-name: "[Visual Search and QA] SDLe Scans - Scan Trivy Bandit Virus"
 
 
 # Only run at most 1 workflow concurrently per PR, unlimited for branches
